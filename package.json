@@ -1,0 +1,13 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "description": "My 3D Portfolio",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --host=0.0.0.0 --ignore=node_modules",
+    "dev": "live-server --host=0.0.0.0 --ignore=node_modules"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.0"
+  }
+}
