@@ -35,6 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const starMesh = new THREE.Points(starGeometry, starMaterial);
     scene.add(starMesh);
 
+    // --- Warp Speed State ---
+    let warpSpeed = 0;
+    let isWarping = false;
+    let warpTimeout = null;
+
+    // Listen for button clicks to trigger warp
+    const warpTriggers = document.querySelectorAll('.btn, .nav-links a, .project-link');
+    warpTriggers.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            isWarping = true;
+            if (warpTimeout) clearTimeout(warpTimeout);
+            
+            // Stop warping after 800ms
+            warpTimeout = setTimeout(() => {
+                isWarping = false;
+            }, 800);
+        });
+    });
+
     // --- Animal Faces (Cat Constellations) ---
     const textureLoader = new THREE.TextureLoader();
     const catTexture = textureLoader.load('cat.png');
@@ -141,6 +160,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 3. Warp Speed Effect
+        if (isWarping) {
+            warpSpeed += (30 - warpSpeed) * 0.1;
+            camera.fov += (120 - camera.fov) * 0.1;
+        } else {
+            warpSpeed += (0 - warpSpeed) * 0.05;
+            camera.fov += (75 - camera.fov) * 0.05;
+        }
+        camera.updateProjectionMatrix();
+
+        if (warpSpeed > 0.1) {
+            const positions = starGeometry.attributes.position.array;
+            for (let i = 0; i < starCount; i++) {
+                // Move stars towards camera
+                positions[i * 3 + 2] += warpSpeed;
+                
+                // If star passes camera, reset it far back
+                if (positions[i * 3 + 2] > 500) {
+                    positions[i * 3 + 2] = -1500;
+                }
+            }
+            starGeometry.attributes.position.needsUpdate = true;
+        }
+
         renderer.render(scene, camera);
     }
 
@@ -158,10 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const cursorDot = document.querySelector('.cursor-dot');
 const cursorOutline = document.querySelector('.cursor-outline');
 
-window.addEventListener('mousemove', (e) => {
-    const posX = e.clientX;
-    const posY = e.clientY;
-
+const moveCursor = (posX, posY) => {
     // Dot follows immediately
     cursorDot.style.left = `${posX}px`;
     cursorDot.style.top = `${posY}px`;
@@ -171,7 +211,21 @@ window.addEventListener('mousemove', (e) => {
         left: `${posX}px`,
         top: `${posY}px`
     }, { duration: 500, fill: "forwards" });
+};
+
+window.addEventListener('mousemove', (e) => {
+    moveCursor(e.clientX, e.clientY);
 });
+
+window.addEventListener('touchmove', (e) => {
+    const touch = e.touches[0];
+    moveCursor(touch.clientX, touch.clientY);
+}, { passive: true });
+
+window.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    moveCursor(touch.clientX, touch.clientY);
+}, { passive: true });
 
 // Add hover effect to interactive elements
 const interactables = document.querySelectorAll('a, .btn, .skill-tag');
@@ -250,6 +304,26 @@ const revealObserver = new IntersectionObserver(revealCallback, revealOptions);
 
 revealElements.forEach(el => {
     revealObserver.observe(el);
+});
+
+// --- Mobile Menu Toggle ---
+const menuToggle = document.querySelector('#mobile-menu');
+const navLinks = document.querySelector('.nav-links');
+const navLinksItems = document.querySelectorAll('.nav-links li a');
+
+if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('is-active');
+        navLinks.classList.toggle('active');
+    });
+}
+
+// Close menu when a link is clicked
+navLinksItems.forEach(link => {
+    link.addEventListener('click', () => {
+        menuToggle.classList.remove('is-active');
+        navLinks.classList.remove('active');
+    });
 });
 
 // Trigger once on load for elements already in viewport
