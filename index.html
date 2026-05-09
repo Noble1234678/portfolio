@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christ Noble | Frontend Developer</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Custom Interactive Cursor -->
+  <div class="cursor-dot"></div>
+  <div class="cursor-outline"></div>
+
+  <!-- 3D Interactive Background Canvas -->
+  <div id="vanta-canvas"></div>
+
+  <nav>
+    <div class="logo">CN<span class="dot">.</span></div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Work</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+      <div class="hero-content reveal">
+        <div class="greeting-wrapper">
+          <p class="greeting">Hello World, I am</p>
+          <div class="line"></div>
+        </div>
+        <h1 class="glitch" data-text="Christ Noble">Christ Noble</h1>
+        <h2 class="role">Frontend Developer <span class="app-dev">& App Dev</span></h2>
+        <p class="desc">
+          Crafting immersive, jaw-dropping digital experiences. I turn complex logic into elegant, high-performance interfaces that make people go "Wow".
+        </p>
+        <div class="cta-group">
+          <a href="#projects" class="btn primary">
+            <span class="btn-text">Explore Work</span>
+            <span class="btn-glow"></span>
+          </a>
+          <a href="#contact" class="btn secondary">Let's Talk</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+      <div class="glass-card tilt-card reveal">
+        <div class="card-glow"></div>
+        <div class="card-content about-grid">
+          <div class="about-text">
+            <h2 class="section-title">About Me</h2>
+            <p class="dummy-text">
+              I am a creative Frontend Developer who loves bridging the gap between design and engineering. While my core strength lies in building stunning web interfaces, I also have a strong hand in mobile app development. I obsess over micro-interactions, 3D animations, and pixel-perfect designs.
+            </p>
+            <div class="skills">
+              <span class="skill-tag">HTML5 / CSS3</span>
+              <span class="skill-tag">JavaScript</span>
+              <span class="skill-tag">Flutter</span>
+              <span class="skill-tag">Firebase</span>
+            </div>
+          </div>
+          <div class="about-image-wrapper">
+            <div class="profile-img-container tilt-card">
+              <img src="portfolio.jpeg" alt="Christ Noble" class="profile-img">
+              <div class="card-glow img-glow"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+      <h2 class="section-title reveal text-center">Featured Projects</h2>
+      <div class="project-grid">
+        
+        <div class="glass-card project-card tilt-card reveal">
+          <div class="card-glow"></div>
+          <div class="project-img placeholder-1">
+            <div class="overlay-text">3D Web App</div>
+          </div>
+          <div class="project-info">
+            <h3>Project Alpha</h3>
+            <p>A next-gen web platform featuring WebGL graphics and smooth page transitions. (Dummy description)</p>
+            <a href="#" class="project-link">View Project <span>→</span></a>
+          </div>
+        </div>
+
+        <div class="glass-card project-card tilt-card reveal delay-200">
+          <div class="card-glow"></div>
+          <div class="project-img placeholder-2">
+            <div class="overlay-text">Mobile App</div>
+          </div>
+          <div class="project-info">
+            <h3>Project Beta</h3>
+            <p>Cross-platform mechanic provider mobile application built with Flutter. (Dummy description)</p>
+            <a href="#" class="project-link">View Project <span>→</span></a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact reveal">
+      <div class="glass-card tilt-card contact-card text-center">
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <h2 class="contact-heading">Contact Me</h2>
+          <h2 class="contact-sub">+91 8925032560</h2>
+          
+          <a href="mailto:hello@example.com" class="mega-email">christnoble108@gmail.com</a>
+          
+          <div class="social-links-row">
+            <a href="#" class="minimal-social">GitHub</a>
+            <span class="separator">/</span>
+            <a href="#" class="minimal-social">LinkedIn</a>
+            <span class="separator">/</span>
+            <a href="#" class="minimal-social">Instagram</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- External Libraries for 3D and Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <!-- Vanta.js for crazy 3D background effects -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js"></script>
+  
+  <script src="script.js"></script>
+</body>
+</html>
