@@ -54,37 +54,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Animal Faces (Cat Constellations) ---
+    // --- Floating Elements (Names & Cat Faces) ---
+    function createTextTexture(text) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 512;
+        canvas.height = 256;
+        
+        context.font = 'Bold 80px "Space Grotesk"';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.shadowColor = '#00f0ff';
+        context.shadowBlur = 20;
+        context.fillStyle = '#ffffff';
+        context.fillText(text, 256, 128);
+        
+        return new THREE.CanvasTexture(canvas);
+    }
+
     const textureLoader = new THREE.TextureLoader();
     const catTexture = textureLoader.load('cat.png');
-    const cats = [];
-    const numCats = 8; // Number of random cats
+    const floatingElements = [];
     
-    for (let i = 0; i < numCats; i++) {
-        const catMaterial = new THREE.SpriteMaterial({ 
-            map: catTexture, 
-            color: 0x00f0ff, // match neon blue accent
-            transparent: true,
-            opacity: 0,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
+    // Create Name Sprites
+    const names = ['Christ', 'Noble', 'Christ', 'Noble'];
+    names.forEach((name) => {
+        const texture = createTextTexture(name);
+        const material = new THREE.SpriteMaterial({ 
+            map: texture, color: 0x00f0ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false
         });
-        const catSprite = new THREE.Sprite(catMaterial);
-        
-        // Random scale for variation
-        const scale = 100 + Math.random() * 100;
-        catSprite.scale.set(scale, scale, 1);
-        
-        scene.add(catSprite);
-        
-        cats.push({
-            sprite: catSprite,
-            material: catMaterial,
-            // Randomize the glowing cycle for each cat
-            period: 8 + Math.random() * 10, // each cat has a different cycle length
-            offset: Math.random() * 10, // random start time
-            baseScale: scale
+        const sprite = new THREE.Sprite(material);
+        const scale = 150 + Math.random() * 100;
+        sprite.scale.set(scale, scale / 2, 1);
+        scene.add(sprite);
+        floatingElements.push({ sprite, material, period: 6 + Math.random() * 6, offset: Math.random() * 10, baseScale: scale, isText: true });
+    });
+
+    // Create Cat Sprites
+    for (let i = 0; i < 4; i++) {
+        const material = new THREE.SpriteMaterial({ 
+            map: catTexture, color: 0x00f0ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false
         });
+        const sprite = new THREE.Sprite(material);
+        const scale = 80 + Math.random() * 80;
+        sprite.scale.set(scale, scale, 1);
+        scene.add(sprite);
+        floatingElements.push({ sprite, material, period: 8 + Math.random() * 10, offset: Math.random() * 10, baseScale: scale, isText: false });
     }
 
     camera.position.z = 400;
@@ -118,44 +133,39 @@ document.addEventListener('DOMContentLoaded', () => {
         starMesh.rotation.y = elapsedTime * 0.05 + scrollY * 0.0005;
         starMesh.rotation.x = elapsedTime * 0.02 + scrollY * 0.0005;
 
-        // Subtle parallax effect on mouse move + Scroll reaction for camera
+        // Camera Logic
         targetX = mouseX * 0.1;
         targetY = mouseY * 0.1;
-        
         camera.position.x += (targetX - camera.position.x) * 0.05;
         camera.position.y += (-targetY - (scrollY * 0.15) - camera.position.y) * 0.05;
         camera.lookAt(scene.position);
 
-        // 2. Random Cats Glowing
-        cats.forEach(cat => {
-            // Calculate time in cycle based on each cat's unique offset and period
-            const timeInPeriod = (elapsedTime + cat.offset) % cat.period;
-            
-            // Each cat glows for the last 4 seconds of its period
+        // 2. Elements Glowing & Floating
+        floatingElements.forEach(item => {
+            const timeInPeriod = (elapsedTime + item.offset) % item.period;
             const glowDuration = 4;
-            const threshold = cat.period - glowDuration;
+            const threshold = item.period - glowDuration;
 
             if (timeInPeriod > threshold) {
-                // Fade in and out
-                const fadeProgress = (timeInPeriod - threshold) / glowDuration; // 0 to 1
-                cat.material.opacity = Math.sin(fadeProgress * Math.PI) * 0.7; // Max opacity 0.7
+                const fadeProgress = (timeInPeriod - threshold) / glowDuration; 
+                item.material.opacity = Math.sin(fadeProgress * Math.PI) * 0.7;
                 
-                // Subtle floating animation
-                cat.sprite.position.y += Math.sin(elapsedTime * 2 + cat.offset) * 0.1;
+                // Floating animation
+                item.sprite.position.y += Math.sin(elapsedTime * 1.5 + item.offset) * 0.15;
+                item.sprite.position.x += Math.cos(elapsedTime * 0.5 + item.offset) * 0.1;
                 
-                // Slight pulsing effect on scale
                 const pulse = 1 + Math.sin(fadeProgress * Math.PI) * 0.1;
-                cat.sprite.scale.set(cat.baseScale * pulse, cat.baseScale * pulse, 1);
+                if (item.isText) {
+                    item.sprite.scale.set(item.baseScale * pulse, (item.baseScale / 2) * pulse, 1);
+                } else {
+                    item.sprite.scale.set(item.baseScale * pulse, item.baseScale * pulse, 1);
+                }
             } else {
-                cat.material.opacity = 0;
-                
-                // Reposition randomly when invisible so it pops up in different places
+                item.material.opacity = 0;
                 if (timeInPeriod < 0.1) {
-                    // Spawn it generally in front of the current camera position
-                    cat.sprite.position.x = camera.position.x + (Math.random() - 0.5) * 800;
-                    cat.sprite.position.y = camera.position.y + (Math.random() - 0.5) * 600;
-                    // keep z in front of camera (between 100 and 500 units away)
-                    cat.sprite.position.z = camera.position.z - 100 - Math.random() * 400; 
+                    item.sprite.position.x = camera.position.x + (Math.random() - 0.5) * 1200;
+                    item.sprite.position.y = camera.position.y + (Math.random() - 0.5) * 800;
+                    item.sprite.position.z = camera.position.z - 100 - Math.random() * 500; 
                 }
             }
         });
