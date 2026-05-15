@@ -419,9 +419,38 @@ h1 {
 
 /* --- Projects Section --- */
 .project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  display: flex;
+  overflow-x: auto;
   gap: 3rem;
+  padding: 3rem calc(50vw - 200px); 
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  scroll-snap-type: x mandatory;
+}
+
+.project-grid::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.project-wrapper {
+  display: flex;
+  flex: 0 0 400px; /* Fixed width for each card */
+  height: 100%;
+  perspective: 1500px;
+  scroll-snap-align: center;
+}
+
+@media (max-width: 600px) {
+  .project-wrapper {
+    flex: 0 0 85vw; /* Almost full width on mobile */
+  }
+  .project-grid {
+    padding: 3rem 7.5vw;
+  }
 }
 
 .project-card {
@@ -429,6 +458,8 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  transform-style: preserve-3d;
 }
 
 .project-img {
@@ -453,6 +484,10 @@ h1 {
   background: linear-gradient(45deg, #141e30, #243b55);
 }
 
+.agri-bg {
+  background-image: url('agri.png');
+}
+
 .omni-bg {
   background-image: url('omni.png');
 }
@@ -465,6 +500,16 @@ h1 {
 
 .project-card:has(.omni-bg) .card-glow {
   background: radial-gradient(circle, rgba(0, 255, 0, 0.4) 0%, transparent 70%);
+}
+
+/* Green/Gold glow for Agri Project */
+.project-card:has(.agri-bg):hover {
+  box-shadow: 0 0 30px rgba(0, 255, 100, 0.2);
+  border-color: rgba(0, 255, 100, 0.4);
+}
+
+.project-card:has(.agri-bg) .card-glow {
+  background: radial-gradient(circle, rgba(0, 255, 100, 0.4) 0%, transparent 70%);
 }
 
 .overlay-text {

@@ -254,42 +254,129 @@ interactables.forEach(el => {
 });
 
 
-// --- Vanilla 3D Tilt Effect ---
+// --- Vanilla 3D Tilt & Scroll Effect ---
 const tiltCards = document.querySelectorAll('.tilt-card');
 
 tiltCards.forEach(card => {
+    // Custom properties to store current rotations
+    card._tiltX = 0;
+    card._tiltY = 0;
+    card._scrollTiltY = 0;
+    card._scrollZ = 0;
+    card._scrollScale = 1;
+
+    card.updateTransform = function() {
+        // Combine mouse tilt and horizontal scroll 3D effect
+        this.style.transform = `perspective(1000px) rotateX(${this._tiltX}deg) rotateY(${this._tiltY + this._scrollTiltY}deg) translateZ(${this._scrollZ}px) scale(${this._scrollScale})`;
+    };
+
     card.addEventListener('mousemove', (e) => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        // Calculate rotation based on mouse position relative to card center
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
         
-        const rotateX = ((y - centerY) / centerY) * -10; // Max rotation 10deg
-        const rotateY = ((x - centerX) / centerX) * 10;
+        // Mouse tilt
+        card._tiltX = ((y - centerY) / centerY) * -10; 
+        card._tiltY = ((x - centerX) / centerX) * 10;
         
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        card.updateTransform();
         
-        // Move the glow effect to follow mouse
+        // Glow effect
         const glow = card.querySelector('.card-glow');
         if (glow) {
-            glow.style.left = `${x - 100}px`; // Center the 200px glow
+            glow.style.left = `${x - 100}px`;
             glow.style.top = `${y - 100}px`;
         }
     });
     
     card.addEventListener('mouseleave', () => {
-        // Reset rotation on mouse leave
-        card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+        card._tiltX = 0;
+        card._tiltY = 0;
         card.style.transition = `transform 0.5s ease`;
+        card.updateTransform();
         
         setTimeout(() => {
-            card.style.transition = ''; // Remove transition after reset so mousemove is snappy
+            card.style.transition = ''; 
         }, 500);
     });
 });
+
+// Scroll 3D effect specifically for project cards
+const projectCards = document.querySelectorAll('.project-card');
+
+function updateScroll3D() {
+    const windowWidth = window.innerWidth;
+    const windowCenter = windowWidth / 2;
+    
+    projectCards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.left + rect.width / 2;
+        const distanceFromCenter = cardCenter - windowCenter;
+        
+        // Normalize distance (-1 to 1) based on window width
+        // A smaller divisor makes the effect happen faster as it leaves the center
+        let normalizedDistance = distanceFromCenter / (windowWidth * 0.6); 
+        normalizedDistance = Math.max(-1, Math.min(1, normalizedDistance));
+        
+        // Horizontal scroll 3D effect
+        // Cards turn sideways as they leave the center
+        let scrollRotateY = normalizedDistance * -40; // Max 40deg rotation
+        let scrollTranslateZ = Math.abs(normalizedDistance) * -150; // Push back in 3D space
+        let scrollScale = 1 - Math.abs(normalizedDistance) * 0.15; // Scale down slightly
+        
+        if (card._scrollTiltY !== undefined) {
+            card._scrollTiltY = scrollRotateY;
+            card._scrollZ = scrollTranslateZ;
+            card._scrollScale = scrollScale;
+            card.updateTransform();
+        }
+    });
+    
+    requestAnimationFrame(updateScroll3D);
+}
+
+// Start the 3D scroll loop
+updateScroll3D();
+
+// --- PC Horizontal Scroll for Projects ---
+const projectGrid = document.querySelector('.project-grid');
+let isWheelScrolling = false;
+
+if (projectGrid) {
+    projectGrid.addEventListener('wheel', (e) => {
+        // Only handle vertical wheel deltas (trackpads often give deltaX for horizontal swipe)
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            const maxScrollLeft = projectGrid.scrollWidth - projectGrid.clientWidth;
+            
+            // Check if we can scroll horizontally in the requested direction
+            if ((e.deltaY > 0 && Math.ceil(projectGrid.scrollLeft) < maxScrollLeft) || 
+                (e.deltaY < 0 && projectGrid.scrollLeft > 0)) {
+                
+                e.preventDefault(); // Stop vertical page scroll
+                
+                // Throttle the scroll to work well with CSS scroll-snap
+                if (!isWheelScrolling) {
+                    isWheelScrolling = true;
+                    const scrollAmount = window.innerWidth > 600 ? 450 : window.innerWidth * 0.85; 
+                    const direction = e.deltaY > 0 ? 1 : -1;
+                    
+                    projectGrid.scrollBy({
+                        left: direction * scrollAmount,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Release the throttle after smooth scroll completes
+                    setTimeout(() => {
+                        isWheelScrolling = false;
+                    }, 500);
+                }
+            }
+        }
+    }, { passive: false });
+}
 
 
 // --- Scroll Reveal Animations ---
